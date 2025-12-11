@@ -542,28 +542,28 @@ ul li:hover::before {
     justify-content: center;
     padding: 1rem;
   }
-  
+
   .sidebar button {
     width: auto;
     margin: 0 0.5rem;
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .content {
     margin-left: 0;
     padding: 1rem;
     width: 100%;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
-  
+
   h2.section {
     font-size: 1.5rem;
   }
-  
+
   .section:hover::before {
     content: none;
   }
@@ -715,4 +715,17 @@ a:hover {
 .content.full-width {
   margin-left: 0;
   width: 100%;
+}
+/* Анимация изображения */
+.animated-img {
+  display: block;
+  max-width: 100%;
+  margin: 1rem 0;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }

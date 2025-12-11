@@ -28,7 +28,7 @@ const SideBar = () => {
       
       <Link to="/types">
         <button className={location.pathname === '/types' ? 'active' : ''}>
-          Типы сетей
+          Описание
         </button>
       </Link>
       

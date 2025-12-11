@@ -3,7 +3,7 @@ import { usePageTracking } from '../../hooks/usePageTracking';
 import * as authApi from '../../services/authApi';
 
 const AnalyticsPanel = () => {
-  usePageTracking(7);
+  usePageTracking(8);
   const [kpiData, setKpiData] = useState([]);
   const [loading, setLoading] = useState(true);
 

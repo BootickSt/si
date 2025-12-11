@@ -14,6 +14,7 @@ import os
 from PIL import Image
 import io
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import Response
 from contextlib import asynccontextmanager
 
 # Pydantic модели
@@ -185,29 +186,29 @@ def get_all_pages(
 
 @app.post("/kpi/{page_id}/visit")
 def record_visit(
-    page_id: int, 
+    page_id: int,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
     kpi = db.query(models.KPI).filter(models.KPI.page_id == page_id).first()
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI record not found")
-    
+
     kpi.visit_count += 1
     db.commit()
     return {"message": "Visit recorded", "visit_count": kpi.visit_count}
 
 @app.post("/kpi/{page_id}/time")
 def record_time_spent(
-    page_id: int, 
-    kpi_data: KPIUpdate, 
+    page_id: int,
+    kpi_data: KPIUpdate,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(get_current_active_user)
 ):
     kpi = db.query(models.KPI).filter(models.KPI.page_id == page_id).first()
     if not kpi:
         raise HTTPException(status_code=404, detail="KPI record not found")
-    
+
     kpi.total_time_spent += kpi_data.time_spent
     db.commit()
     return {"message": "Time recorded", "total_time_spent": kpi.total_time_spent}
@@ -236,56 +237,59 @@ def get_all_kpi(
 async def root():
     return {"message": "Neural Networks API with Authentication"}
 
+import requests  # ← Добавить в импорты в начале файла
+
 @app.get("/posts")
 async def get_posts(current_user: models.User = Depends(get_current_active_user)):
-    return [
-        {
-            "userId": 1,
-            "id": 1,
-            "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-            "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
-        },
-        {
-            "userId": 1,
-            "id": 2, 
-            "title": "qui est esse",
-            "body": "est rerum tempore vitae\nsequi sint nihil reprehenderit dolor beatae ea dolores neque\nfugiat blanditiis voluptate porro vel nihil molestiae ut reiciendis\nqui aperiam non debitis possimus qui neque nisi nulla"
-        }
-    ]
+    """Получить посты (аналогично JSONPlaceholder)"""
+    # Получаем посты с JSONPlaceholder
+    response = requests.get("https://jsonplaceholder.typicode.com/posts")
+    response.raise_for_status()
+
+    # Можно изменить данные или добавить свои поля
+    posts = response.json()
+
+    # Пример: добавить поле "source" к каждому посту
+    for post in posts:
+        post["source"] = "local_server_proxy"
+
+    return posts
+
 
 @app.post("/invert-image")
-async def invert_image(
-    file: UploadFile = File(...),
-    current_user: models.User = Depends(get_current_active_user)
-):
+async def invert_image(file: UploadFile = File(...)):
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="File must be an image")
-    
+
     try:
+        # Читаем файл
         contents = await file.read()
-        
-        image = Image.open(io.BytesIO(contents))
-        
-        if image.mode in ('RGBA', 'LA'):
-            background = Image.new('RGB', image.size, (255, 255, 255))
-            background.paste(image, mask=image.split()[-1])
-            image = background
-        elif image.mode != 'RGB':
-            image = image.convert('RGB')
-        
-        inverted_image = Image.eval(image, lambda x: 255 - x)
-        
-        output_path = os.path.join(UPLOAD_DIR, f"inverted_{file.filename}")
-        inverted_image.save(output_path, "JPEG")
-        
-        return FileResponse(
-            path=output_path,
-            filename=f"inverted_{file.filename}",
-            media_type='image/jpeg'
-        )
-        
+
+        # Открываем изображение
+        img = Image.open(io.BytesIO(contents))
+
+        # Конвертируем в RGB
+        if img.mode in ('RGBA', 'LA', 'P'):
+            rgb_image = Image.new('RGB', img.size, (255, 255, 255))
+            rgb_image.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+            img = rgb_image
+        elif img.mode != 'RGB':
+            img = img.convert('RGB')
+
+        # Инвертируем цвета
+        inverted_img = Image.eval(img, lambda x: 255 - x)
+
+        # Сохраняем в буфер в памяти
+        buffer = io.BytesIO()
+        inverted_img.save(buffer, format="PNG")
+        buffer.seek(0)
+
+        # Возвращаем как бинарные данные
+        return Response(content=buffer.getvalue(), media_type="image/png")
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
+        print(f"Image processing error: {e}")
+        raise HTTPException(status_code=500, detail=f"Image processing error: {str(e)}")
 
 @app.get("/openapi.json", include_in_schema=False)
 async def get_openapi():

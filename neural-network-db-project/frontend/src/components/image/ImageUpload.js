@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { usePageTracking } from '../../hooks/usePageTracking';
 
 const ImageUpload = () => {
-  usePageTracking(6); // ID для страницы "Инверсия изображения"
+  usePageTracking(9); // ID для страницы "Инверсия изображения"
   const [selectedFile, setSelectedFile] = useState(null);
   const [invertedImage, setInvertedImage] = useState(null);
   const [loading, setLoading] = useState(false);

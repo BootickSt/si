@@ -5,20 +5,21 @@ const ConclusionPanel = () => {
   usePageTracking(3); // ID для страницы "Заключение"
 
   return (
-    <div>
-      <h1>Какие бывают нейронные сети</h1>
+    <main className="content">
+    <header>
+    <h1>Документация по компоненту</h1>
+    </header>
 
-      <h2 className="section">Заключение</h2>
-      <p>Нейронные сети стали важнейшим инструментом в развитии искусственного интеллекта. Будущее за новыми архитектурами, которые сделают технологии ещё более доступными и полезными в нашей жизни.</p>
+    <section id="conclusion">
+    <h2 className="section-title">Заключение</h2>
+    <p>Здесь можно подвести итоги и оставить контакты.</p>
+    <p>Спасибо за внимание!</p>
+    </section>
 
-      <div className="image-container">
-        <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Artificial_neural_network.svg/512px-Artificial_neural_network.svg.png" 
-          alt="Схема нейросети" 
-        />
-      </div>
-    </div>
+    <footer>
+    <p>© 2025 — Пример документации</p>
+    </footer>
+    </main>
   );
 };
-
 export default ConclusionPanel;
